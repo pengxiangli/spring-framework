@@ -242,10 +242,29 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected <T> T doGetBean(final String name, @Nullable final Class<T> requiredType,
 			@Nullable final Object[] args, boolean typeCheckOnly) throws BeansException {
 
+		/**
+		 * 通过name获取beanName。 这里不使用name作为beanName有两个原因
+		 * 1、name可能会已 & 字符开头，表明调用者想获取FactoryBean本身，而非FactoryBean
+		 * 		实现类所创建的 bean，在BeanFactory中，FactoryBean的实现类和其他的bean
+		 * 		方式是一致的，即 <beanName,bean>, beanName中是没有 & 这个符号的，所以我们将
+		 * 		name的首字母移除，这样才能从缓冲中找到FactoryBean实例。
+		 * 2. 还是别名的问题，转换需要
+		 */
 		final String beanName = transformedBeanName(name);
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		/**
+		 * 这个方法在初始化的时候会调用，在getBean的时候也会调用
+		 * 为什么需要这么做呢？
+		 * 也就是说spring在初始化的时候先获取这个对象
+		 * 判断这个对象是否被实例化好了(普通情况下绝对为空======有一种情况不为空)
+		 * 从spring容器中获取一个bean，由于spring中bean容器是一个map(singletion)
+		 * 所以你可以理解getSingleton(beanName)等于beanMap.get(beanName)
+		 * 由于方法会在spring初始化的时候(就是对象被创建的时候)调用一次
+		 * 还会在getBean的时候调用一次
+		 * 所以在调试的时候需要特别注意，不能直接断点在这里
+		 */
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
