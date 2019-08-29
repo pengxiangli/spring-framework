@@ -276,12 +276,19 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.trace("Returning cached instance of singleton bean '" + beanName + "'");
 				}
 			}
+			/**
+			 * 如果sharedInstance是普通的单例bean，下面的方法会直接返回
+			 * 如果sharedInstance是FactoryBean类型的，则需调用getObject
+			 * bean实例，如果用户想获取FactoryBean本身，这里也不会做。。。
+			 * 即可，毕竟FactoryBean的实现类本身也是一种bean，只不过
+			 */
 			bean = getObjectForBeanInstance(sharedInstance, name, beanName, null);
 		}
 
 		else {
 			// Fail if we're already creating this bean instance:
 			// We're assumably within a circular reference.
+			/** 如果是原型，不应该在初始化的时候创建 **/
 			if (isPrototypeCurrentlyInCreation(beanName)) {
 				throw new BeanCurrentlyInCreationException(beanName);
 			}
@@ -309,6 +316,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			if (!typeCheckOnly) {
+				//添加到aleradyCreated set集合中，表示他已经创建过一条
 				markBeanAsCreated(beanName);
 			}
 

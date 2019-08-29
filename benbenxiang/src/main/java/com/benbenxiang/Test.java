@@ -1,21 +1,20 @@
 package com.benbenxiang;
 
 import com.benbenxiang.app.AppConfig;
-import com.benbenxiang.service.CityService;
 import com.benbenxiang.servlet.Example1;
-import com.benbenxiang.servlet.Example2;
-import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.util.Assert;
 
 public class Test {
+
+
 	public static void main(String[] args){
 
 		/** init spring context（环境、上下文、spring容器） **/
 		AnnotationConfigApplicationContext ac =
 				new AnnotationConfigApplicationContext(AppConfig.class);
-		Assert.hasText("null", "");
+//		Assert.hasText("null", "");
+//		StringUtils.isEmpty(";;");
+
 //		for {
 //			GenericBeanDefinition gbd = new GenericBeanDefinition();//用来描述bean的对象
 //			gbd.setBeanClassName("example1");
@@ -39,8 +38,12 @@ public class Test {
 		UserDao userDao = ac.getBean(UserDao.class);
 		userDao.query();*/
 
-		System.out.println(ac.getBean(Example1.class));
 
+//		ac.getBean(Example1.class); //singletonObjects.get("beanName");
+		System.out.println(ac.getBean(Example1.class));
+		System.out.println(ac.getBean(Example1.class));
+//		System.out.println(ac.getBean("&example1"));
+		ac.close();
 
 
 	}

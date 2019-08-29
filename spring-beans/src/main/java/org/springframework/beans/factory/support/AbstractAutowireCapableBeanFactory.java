@@ -493,6 +493,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Prepare method overrides.
+		/** 处理 lookup-method 和 replace-method 配置 Spring将。。。 **/
 		try {
 			mbdToUse.prepareMethodOverrides();
 		}
@@ -502,6 +503,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		try {
+			/**
+			 * 第一次应用spring的后置处理器
+			 * 在 bean 初始化前应用后置处理器， 如果后置处理器返回的bean不为空，则直接返回
+			 * 这个类需要通过代码演示
+			 */
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {
@@ -554,6 +560,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
+			/**
+			 * 创建bean实例，并将实现包裹在BeanWrapper对象中返回。
+			 * createBeanInstance中包含三种创建bean实例的方式。
+			 * 		1. 通过工厂方法创建bean实例
+			 * 		2. 通过构造方法自动注入（autowire by construct）的方式创建bean
+			 * 		3. 通过无参构造方法创建bean实例
+			 * 若 bean 的配置信息中配置了 lookup-method 和 replace-method ，则会使用。。。
+			 * 增强bean实例。
+			 */
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		final Object bean = instanceWrapper.getWrappedInstance();
@@ -591,7 +606,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Initialize the bean instance.
 		Object exposedObject = bean;
 		try {
+			/** 设置属性 ，非常重要 **/
 			populateBean(beanName, mbd, instanceWrapper);
+			/** 执行后置处理器，aop就是在这里完成的 **/
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -1793,11 +1810,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
+			/** 第七次执行后置处理器
+			 *  执行后置处理器的before ---PostConstruct
+			 * **/
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
 		try {
-			invokeInitMethods(beanName, wrappedBean, mbd);
+			invokeInitMethods(beanName, wrappedBean, mbd);/** 执行bean的生命周期回调中的init方法	 **/
 		}
 		catch (Throwable ex) {
 			throw new BeanCreationException(
